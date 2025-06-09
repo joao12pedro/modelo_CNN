@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Classificação de Esporte</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f2f2f2;
+      padding: 30px;
+      text-align: center;
+    }
+    h1 {
+      color: #333;
+    }
+    form {
+      margin: 20px auto;
+      padding: 20px;
+      border: 1px solid #ccc;
+      background: #fff;
+      max-width: 400px;
+      border-radius: 10px;
+    }
+    input[type="file"] {
+      margin: 15px 0;
+    }
+    button {
+      padding: 10px 20px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    #result {
+      margin-top: 30px;
+      font-size: 1.2em;
+      color: #222;
+    }
+    img {
+      max-width: 300px;
+      margin-top: 20px;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <h1>Classificador de Esportes</h1>
+
+  <form id="upload-form" enctype="multipart/form-data">
+    <input type="file" name="file" id="file-input" accept="image/*" required>
+    <br>
+    <button type="submit">Enviar imagem</button>
+  </form>
+
+  <div id="result"></div>
+  <img id="preview" src="#" alt="Pré-visualização da imagem"/>
+
+  <script>
+    const form = document.getElementById('upload-form');
+    const resultDiv = document.getElementById('result');
+    const previewImg = document.getElementById('preview');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const fileInput = document.getElementById('file-input');
+      const file = fileInput.files[0];
+      if (!file) return;
+
+      // Mostrar prévia da imagem
+      const reader = new FileReader();
+      reader.onload = () => {
+        previewImg.src = reader.result;
+        previewImg.style.display = "block";
+      };
+      reader.readAsDataURL(file);
+
+      const formData = new FormData();
+      formData.append("file", file);
+
+      resultDiv.innerHTML = "Processando imagem...";
+
+      try {
+        const response = await fetch('/predict', {
+          method: 'POST',
+          body: formData
+        });
+
+        const text = await response.text();
+        resultDiv.innerHTML = text;
+      } catch (error) {
+        resultDiv.innerHTML = "Erro ao enviar a imagem.";
+      }
+    });
+  </script>
+</body>
+</html>
